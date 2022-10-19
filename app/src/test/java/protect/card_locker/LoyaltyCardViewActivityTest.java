@@ -55,6 +55,7 @@ import java.util.Currency;
 import java.util.Date;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.widget.TextViewCompat;
 import androidx.preference.PreferenceManager;
 
@@ -1369,5 +1370,45 @@ public class LoyaltyCardViewActivityTest {
 
         checkAllFields(activity, ViewMode.ADD_CARD, "Example Store", "", context.getString(R.string.never), "0", context.getString(R.string.points), "123456", context.getString(R.string.sameAsCardId), "Aztec", null, null);
         assertEquals(-416706, ((ColorDrawable) activity.findViewById(R.id.thumbnail).getBackground()).getColor());
+    }
+
+    @Test
+    public void hideStoreNameOnTap(){
+        ActivityController activityController = createActivityWithLoyaltyCard(false);
+
+        Activity activity = (Activity) activityController.get();
+        SQLiteDatabase database = TestHelpers.getEmptyDb(activity).getWritableDatabase();
+        DBHelper.insertLoyaltyCard(database, "store", "note", null, new BigDecimal("0"), null, BARCODE_DATA, null, BARCODE_TYPE, Color.BLACK, 0, null,0);
+
+        activityController.start();
+        activityController.visible();
+        activityController.resume();
+
+        assertEquals(false, activity.isFinishing());
+
+        AppCompatTextView storeName = activity.findViewById(R.id.storeName);
+
+        // storeName should be in view with alpha 1.
+        assertEquals(View.VISIBLE,  storeName.getVisibility());
+        assertEquals(1,  storeName.getAlpha(), 0);
+
+        // Click storeName to hide it.
+        storeName.performClick();
+        shadowOf(getMainLooper()).idle();
+
+        // storeName alpha should be none meaning its invisible but clickable.
+        assertEquals(0,  storeName.getAlpha(), 0);
+        assertEquals(View.VISIBLE,  storeName.getVisibility());
+
+        // Click storeName to show it.
+        storeName.performClick();
+
+        // storeName should be in view with alpha 1.
+        assertEquals(View.VISIBLE,  storeName.getVisibility());
+        assertEquals(1,  storeName.getAlpha(), 0);
+
+        shadowOf(getMainLooper()).idle();
+
+        database.close();
     }
 }

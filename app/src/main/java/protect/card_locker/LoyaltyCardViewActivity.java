@@ -645,6 +645,16 @@ public class LoyaltyCardViewActivity extends CatimaAppCompatActivity implements 
                 1, TypedValue.COMPLEX_UNIT_SP);
 
         storeName.setText(loyaltyCard.store);
+        storeName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (storeName.getAlpha() == 1){
+                    storeName.setAlpha(0);
+                } else {
+                    storeName.setAlpha(1);
+                }
+            }
+        });
         storeName.setTextSize(settings.getFontSizeMax(settings.getLargeFont()));
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
                 storeName,

@@ -300,4 +300,5 @@
         <item quantity="other">View archive (<xliff:g>%1$d</xliff:g> cards)</item>
     </plurals>
     <string name="welcome">Welcome to Catima</string>
+    <string name="edit_image">Edit Image</string>
 </resources>

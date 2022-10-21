@@ -103,6 +103,10 @@ public class Settings {
         return getBoolean(R.string.settings_key_disable_lockscreen_while_viewing_card, true);
     }
 
+    public boolean getGroupSwiping(){
+        return getBoolean(R.string.settings_key_disable_group_swiping, true);
+    }
+
     public boolean getOledDark() {
         return getBoolean(R.string.settings_key_oled_dark, false);
     }

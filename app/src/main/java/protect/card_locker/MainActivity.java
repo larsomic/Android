@@ -47,6 +47,7 @@ import protect.card_locker.databinding.ContentMainBinding;
 import protect.card_locker.databinding.MainActivityBinding;
 import protect.card_locker.databinding.SortingOptionBinding;
 import protect.card_locker.preferences.SettingsActivity;
+import protect.card_locker.preferences.Settings;
 
 public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCardCursorAdapter.CardAdapterListener, GestureDetector.OnGestureListener {
     private MainActivityBinding binding;
@@ -77,6 +78,7 @@ public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCard
 
     private ActivityResultLauncher<Intent> mBarcodeScannerLauncher;
     private ActivityResultLauncher<Intent> mSettingsLauncher;
+    Settings settings;
 
     private ActionMode.Callback mCurrentActionModeCallback = new ActionMode.Callback() {
         @Override
@@ -230,6 +232,7 @@ public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCard
 
     @Override
     protected void onCreate(Bundle inputSavedInstanceState) {
+        settings = new Settings(this);
         extractIntentFields(getIntent());
         SplashScreen.installSplashScreen(this);
         super.onCreate(inputSavedInstanceState);
@@ -798,7 +801,7 @@ public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCard
         Integer currentTab = groupsTabLayout.getSelectedTabPosition();
         Log.d("onFling", "Current Tab " + currentTab);
         // Swipe right
-        if (velocityX < -150) {
+        if (velocityX < -150 && settings.getGroupSwiping()) {
             Log.d("onFling", "Right Swipe detected " + velocityX);
             Integer nextTab = currentTab + 1;
 
@@ -812,7 +815,7 @@ public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCard
         }
 
         // Swipe left
-        if (velocityX > 150) {
+        if (velocityX > 150 && settings.getGroupSwiping()) {
             Log.d("onFling", "Left Swipe detected " + velocityX);
             Integer nextTab = currentTab - 1;
 

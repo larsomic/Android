@@ -300,4 +300,6 @@
         <item quantity="other">View archive (<xliff:g>%1$d</xliff:g> cards)</item>
     </plurals>
     <string name="welcome">Welcome to Catima</string>
+    <string name="settings_disable_group_swiping">Group Swiping</string>
+    <string name="settings_key_disable_group_swiping" translatable="false">pref_disable_group_swiping</string>
 </resources>

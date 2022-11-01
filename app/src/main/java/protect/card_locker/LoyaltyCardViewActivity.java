@@ -805,8 +805,6 @@ public class LoyaltyCardViewActivity extends CatimaAppCompatActivity implements 
         int darkenedColor = ColorUtils.blendARGB(backgroundHeaderColor, Color.BLACK, 0.1f);
         barcodeScaler.setProgressTintList(ColorStateList.valueOf(darkenedColor));
         barcodeScaler.setThumbTintList(ColorStateList.valueOf(darkenedColor));
-        barcodeWidthScaler.setProgressTintList(ColorStateList.valueOf(darkenedColor));
-        barcodeWidthScaler.setThumbTintList(ColorStateList.valueOf(darkenedColor));
         maximizeButton.setBackgroundColor(darkenedColor);
         minimizeButton.setBackgroundColor(darkenedColor);
         bottomAppBar.setBackgroundColor(darkenedColor);
@@ -1207,7 +1205,7 @@ public class LoyaltyCardViewActivity extends CatimaAppCompatActivity implements 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 getWindow().setDecorFitsSystemWindows(false);
                 if (getWindow().getInsetsController() != null) {
-                    getWindow().getInsetsController().hide(WindowInsets.Type.statusBars());
+                    getWindow().getInsetsController().hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
                     getWindow().getInsetsController().setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
                 }
             } else {

@@ -8,6 +8,7 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.view.WindowInsetsControllerCompat;
 
 public class CatimaAppCompatActivity extends AppCompatActivity {
@@ -20,6 +21,15 @@ public class CatimaAppCompatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_NO
+                    || !Utils.isDarkModeEnabled(this)) {
+                View decorView = getWindow().getDecorView();
+                WindowInsetsControllerCompat wic = new WindowInsetsControllerCompat(getWindow(), decorView);
+                wic.setAppearanceLightNavigationBars(true);
+                getWindow().setNavigationBarColor(Color.WHITE);
+            }
+        }
         Utils.patchColors(this);
     }
 

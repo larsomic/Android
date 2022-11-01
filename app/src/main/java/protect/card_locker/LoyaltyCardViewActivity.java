@@ -1064,7 +1064,7 @@ public class LoyaltyCardViewActivity extends CatimaAppCompatActivity implements 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 getWindow().setDecorFitsSystemWindows(false);
                 if (getWindow().getInsetsController() != null) {
-                    getWindow().getInsetsController().hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
+                    getWindow().getInsetsController().hide(WindowInsets.Type.statusBars());
                     getWindow().getInsetsController().setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
                 }
             } else {

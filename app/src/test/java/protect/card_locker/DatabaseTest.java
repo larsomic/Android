@@ -40,6 +40,19 @@ public class DatabaseTest {
         mDatabase = TestHelpers.getEmptyDb(mActivity).getWritableDatabase();
     }
 
+    /**
+     * Test the number of columns in the database, and whether zoomWidth was updated successuflly.
+     * This test is added for the addition of the "zoomWidth" function.
+     */
+    @Test
+    public void testNumColumns() {
+        assertEquals(15,DBHelper.getColumnCount(mDatabase));
+        long id = DBHelper.insertLoyaltyCard(mDatabase, "store", "note", null, new BigDecimal("0"), null, "cardId", null, CatimaBarcode.fromBarcode(BarcodeFormat.UPC_A), DEFAULT_HEADER_COLOR, 0, null,0);
+        assertTrue(DBHelper.updateLoyaltyCardZoomWidth(mDatabase, 1, 80));
+        LoyaltyCard loyaltyCard = DBHelper.getLoyaltyCard(mDatabase, 1);
+        assertEquals(80,loyaltyCard.zoomWidth);
+    }
+
     @Test
     public void addRemoveOneGiftCard() {
         assertEquals(0, DBHelper.getLoyaltyCardCount(mDatabase));
@@ -503,5 +516,31 @@ public class DatabaseTest {
         assertEquals(0, card2.starStatus);
         assertEquals(0, card2.lastUsed);
         assertEquals(100, card2.zoomLevel);
+    }
+
+    @Test
+    public void updateGiftCardOnlyBalance() {
+        long id = DBHelper.insertLoyaltyCard(mDatabase, "store", "note", null, new BigDecimal("100"), null, "cardId", null, CatimaBarcode.fromBarcode(BarcodeFormat.UPC_A), DEFAULT_HEADER_COLOR, 0, null,0);
+        boolean result = (id != -1);
+        assertTrue(result);
+        assertEquals(1, DBHelper.getLoyaltyCardCount(mDatabase));
+
+        result = DBHelper.updateLoyaltyCardBalance(mDatabase, 1, new BigDecimal(60));
+        assertTrue(result);
+        assertEquals(1, DBHelper.getLoyaltyCardCount(mDatabase));
+
+        LoyaltyCard loyaltyCard = DBHelper.getLoyaltyCard(mDatabase, 1);
+        assertNotNull(loyaltyCard);
+        assertEquals("store", loyaltyCard.store);
+        assertEquals("note", loyaltyCard.note);
+        assertEquals(null, loyaltyCard.expiry);
+        assertEquals(new BigDecimal(60), loyaltyCard.balance);
+        assertEquals(null, loyaltyCard.balanceType);
+        assertEquals("cardId", loyaltyCard.cardId);
+        assertEquals(null, loyaltyCard.barcodeId);
+        assertEquals(BarcodeFormat.UPC_A, loyaltyCard.barcodeType.format());
+        assertEquals(DEFAULT_HEADER_COLOR, loyaltyCard.headerColor);
+        assertEquals(0, loyaltyCard.starStatus);
+        assertEquals(0, loyaltyCard.archiveStatus);
     }
 }

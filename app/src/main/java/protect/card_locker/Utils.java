@@ -265,13 +265,13 @@ public class Utils {
         return new BigDecimal(numberFormat.parse(value).toString());
     }
 
-    static public byte[] bitmapToByteArray(Bitmap bitmap) {
+    static public byte[] bitmapToByteArray(Bitmap bitmap, boolean hasTransparentBackground) {
         if (bitmap == null) {
             return null;
         }
-
+        Bitmap.CompressFormat format = hasTransparentBackground ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.JPEG;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);
+        bitmap.compress(format, 100, bos);
         return bos.toByteArray();
     }
 
@@ -342,6 +342,21 @@ public class Utils {
         return cardImageFileNameBuilder.toString();
     }
 
+    public static String getCardImageFileName(int loyaltyCardId, ImageLocationType type, String format) {
+        String templateString = getCardImageFileName(loyaltyCardId, type);
+        return templateString.substring(0, templateString.length() - 3) + format;
+    }
+
+    public static boolean hasTransparentBackground(Bitmap bitmap) {
+        for (int x = 0; x < bitmap.getWidth(); x++) {
+            for (int y = 0; y < bitmap.getHeight(); y++) {
+                if (bitmap.getPixel(x, y) >> 24 == 0x00) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     static public void saveCardImage(Context context, Bitmap bitmap, String fileName) throws FileNotFoundException {
         if (bitmap == null) {
             context.deleteFile(fileName);
@@ -349,8 +364,22 @@ public class Utils {
         }
 
         FileOutputStream out = context.openFileOutput(fileName, Context.MODE_PRIVATE);
+        //int[] bitmapPixels = new int[bitmap.getHeight() * bitmap.getWidth()];
+        bitmap.compress(determineCardImageFormat(bitmap), 100, out);
+    }
 
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+    public static Bitmap.CompressFormat determineCardImageFormat(Bitmap bitmap) {
+        boolean hasTransparentBackground = false;
+        for (int i = 0; i < bitmap.getWidth(); i++) {
+            for (int j = 0; j < bitmap.getHeight(); j++) {
+                if ((bitmap.getPixel(i, j))>>24 == 0x00) {
+                    hasTransparentBackground = true;
+                    break;
+                }
+            }
+        }
+        Log.d("compresser", "is card transparent: " + hasTransparentBackground);
+        return hasTransparentBackground ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.JPEG;
     }
 
     static public void saveCardImage(Context context, Bitmap bitmap, int loyaltyCardId, ImageLocationType type) throws FileNotFoundException {

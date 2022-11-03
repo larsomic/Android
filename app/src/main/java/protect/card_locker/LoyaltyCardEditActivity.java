@@ -1413,10 +1413,13 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
             }
             if (image == null) {
                 Log.d("cropper", "failed loading bitmap for initial width and height for ucrop " + sourceUri.toString());
+
                 setCropperOptions(true, 0f, 0f, image.hasAlpha() ? TEMP_CROP_IMAGE_FORMAT : TEMP_CROP_IMAGE_FORMAT_COMPRESSED);
             } else {
                 try {
                     Bitmap imageRotated = Utils.rotateBitmap(image, new ExifInterface(getContentResolver().openInputStream(sourceUri)));
+                    boolean isTransparent = imageRotated.hasAlpha();
+                    Log.d("cropper", "does image have alpha channel: " + isTransparent);
                     setCropperOptions(false, imageRotated.getWidth(), imageRotated.getHeight(), imageRotated.hasAlpha() ? TEMP_CROP_IMAGE_FORMAT : TEMP_CROP_IMAGE_FORMAT_COMPRESSED);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();

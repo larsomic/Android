@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -30,7 +32,7 @@ import protect.card_locker.databinding.CustomBarcodeScannerBinding;
 import protect.card_locker.databinding.ScanActivityBinding;
 
 /**
- * Custom Scannner Activity extending from Activity to display a custom layout form scanner view.
+ * Custom Scanner Activity extending from Activity to display a custom layout form scanner view.
  * <p>
  * Based on https://github.com/journeyapps/zxing-android-embedded/blob/0fdfbce9fb3285e985bad9971c5f7c0a7a334e7b/sample/src/main/java/example/zxing/CustomScannerActivity.java
  * originally licensed under Apache 2.0
@@ -212,7 +214,9 @@ public class ScanActivity extends CatimaAppCompatActivity {
     }
 
     public void addFromImage(View view) {
-        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        Intent photoPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        String path = Environment.getExternalStorageDirectory() + "/";
+        Uri uri = Uri.parse(path);
         photoPickerIntent.setType("image/*");
         try {
             photoPickerLauncher.launch(photoPickerIntent);

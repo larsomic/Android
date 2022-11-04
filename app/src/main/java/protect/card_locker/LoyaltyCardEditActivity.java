@@ -16,6 +16,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.LocaleList;
 import android.text.Editable;
 import android.text.InputType;
@@ -1186,7 +1187,9 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
                     throw new IllegalArgumentException("Unknown ID type " + v.getId());
                 }
 
-                Intent i = new Intent(Intent.ACTION_PICK);
+                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+                String path = Environment.getExternalStorageDirectory() + "/";
+                Uri uri = Uri.parse(path);
                 i.setType("image/*");
 
                 try {

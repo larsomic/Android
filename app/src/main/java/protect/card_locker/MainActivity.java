@@ -178,28 +178,25 @@ public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCard
                 dialog.show();
 
                 return true;
-            }
-            else if(inputItem.getItemId() == R.id.action_archive){
+            } else if (inputItem.getItemId() == R.id.action_archive) {
                 for (LoyaltyCard loyaltyCard : mAdapter.getSelectedItems()) {
                     Log.d(TAG, "Archiving card: " + loyaltyCard.id);
-                    DBHelper.updateLoyaltyCardArchiveStatus(mDatabase, loyaltyCard.id,1);
+                    DBHelper.updateLoyaltyCardArchiveStatus(mDatabase, loyaltyCard.id, 1);
                     updateLoyaltyCardList(false);
                     inputMode.finish();
                     invalidateOptionsMenu();
                 }
                 return true;
-            }
-            else if(inputItem.getItemId() == R.id.action_unarchive){
+            } else if (inputItem.getItemId() == R.id.action_unarchive) {
                 for (LoyaltyCard loyaltyCard : mAdapter.getSelectedItems()) {
                     Log.d(TAG, "Unarchiving card: " + loyaltyCard.id);
-                    DBHelper.updateLoyaltyCardArchiveStatus(mDatabase, loyaltyCard.id,0);
+                    DBHelper.updateLoyaltyCardArchiveStatus(mDatabase, loyaltyCard.id, 0);
                     updateLoyaltyCardList(false);
                     inputMode.finish();
                     invalidateOptionsMenu();
                 }
                 return true;
-            }
-            else if(inputItem.getItemId() == R.id.action_star){
+            } else if (inputItem.getItemId() == R.id.action_star) {
                 for (LoyaltyCard loyaltyCard : mAdapter.getSelectedItems()) {
                     Log.d(TAG, "Starring card: " + loyaltyCard.id);
                     DBHelper.updateLoyaltyCardStarStatus(mDatabase, loyaltyCard.id, 1);
@@ -207,8 +204,7 @@ public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCard
                     inputMode.finish();
                 }
                 return true;
-            }
-            else if(inputItem.getItemId() == R.id.action_unstar){
+            } else if (inputItem.getItemId() == R.id.action_unstar) {
                 for (LoyaltyCard loyaltyCard : mAdapter.getSelectedItems()) {
                     Log.d(TAG, "Unstarring card: " + loyaltyCard.id);
                     DBHelper.updateLoyaltyCardStarStatus(mDatabase, loyaltyCard.id, 0);
@@ -233,15 +229,14 @@ public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCard
         extractIntentFields(getIntent());
         SplashScreen.installSplashScreen(this);
         super.onCreate(inputSavedInstanceState);
-        if(!mArchiveMode) {
+        if (!mArchiveMode) {
             binding = MainActivityBinding.inflate(getLayoutInflater());
             setTitle(R.string.app_name);
             setContentView(binding.getRoot());
             setSupportActionBar(binding.toolbar);
             groupsTabLayout = binding.groups;
             contentMainBinding = ContentMainBinding.bind(binding.include.getRoot());
-        }
-        else{
+        } else {
             archiveActivityBinding = ArchiveActivityBinding.inflate(getLayoutInflater());
             setTitle(R.string.archiveList);
             setContentView(archiveActivityBinding.getRoot());
@@ -250,7 +245,7 @@ public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCard
             contentMainBinding = ContentMainBinding.bind(archiveActivityBinding.include.getRoot());
         }
 
-        if(mArchiveMode){
+        if (mArchiveMode) {
             ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {
                 actionBar.setDisplayHomeAsUpEnabled(true);
@@ -586,9 +581,9 @@ public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCard
 
     @Override
     public boolean onCreateOptionsMenu(Menu inputMenu) {
-        if(!mArchiveMode)
+        if (!mArchiveMode)
             getMenuInflater().inflate(R.menu.main_menu, inputMenu);
-        else{
+        else {
             getMenuInflater().inflate(R.menu.archive_menu, inputMenu);
         }
 
@@ -626,7 +621,7 @@ public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCard
             });
         }
 
-        if(!mArchiveMode) {
+        if (!mArchiveMode) {
             if (DBHelper.getArchivedCardsCount(mDatabase) == 0) {
                 inputMenu.findItem(R.id.action_archived).setVisible(false);
             } else {
@@ -858,11 +853,10 @@ public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCard
             boolean hasStarred = false;
             boolean hasUnstarred = false;
 
-            if(!mArchiveMode) {
+            if (!mArchiveMode) {
                 unarchiveItem.setVisible(false);
                 archiveItem.setVisible(true);
-            }
-            else{
+            } else {
                 unarchiveItem.setVisible(true);
                 archiveItem.setVisible(false);
             }

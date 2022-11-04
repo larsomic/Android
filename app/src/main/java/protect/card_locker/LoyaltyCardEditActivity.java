@@ -100,13 +100,15 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
 
     private final String TEMP_CAMERA_IMAGE_NAME = LoyaltyCardEditActivity.class.getSimpleName() + "_camera_image.jpg";
     private final String TEMP_CROP_IMAGE_NAME = LoyaltyCardEditActivity.class.getSimpleName() + "_crop_image.png";
+    private final String TEMP_CROP_IMAGE_NAME_COMPRESSED = LoyaltyCardEditActivity.class.getSimpleName() + "_crop_image.jpg";
     private final Bitmap.CompressFormat TEMP_CROP_IMAGE_FORMAT = Bitmap.CompressFormat.PNG;
+    private final Bitmap.CompressFormat TEMP_CROP_IMAGE_FORMAT_COMPRESSED = Bitmap.CompressFormat.JPEG;
 
     private final String TEMP_UNSAVED_FRONT_IMAGE_NAME = LoyaltyCardEditActivity.class.getSimpleName() + "_front_image.png";
     private final String TEMP_UNSAVED_BACK_IMAGE_NAME = LoyaltyCardEditActivity.class.getSimpleName() + "_back_image.png";
     private final String TEMP_UNSAVED_ICON_NAME = LoyaltyCardEditActivity.class.getSimpleName() + "_icon.png";
     private final Bitmap.CompressFormat TEMP_UNSAVED_IMAGE_FORMAT = Bitmap.CompressFormat.PNG;
-
+    private final Bitmap.CompressFormat TEMP_UNSAVED_IMAGE_FORMAT_COMPRESSED = Bitmap.CompressFormat.JPEG;
     private static final int PERMISSION_REQUEST_CAMERA_IMAGE_FRONT = 100;
     private static final int PERMISSION_REQUEST_CAMERA_IMAGE_BACK = 101;
     private static final int PERMISSION_REQUEST_CAMERA_IMAGE_ICON = 102;
@@ -255,21 +257,23 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
         savedInstanceState.putInt(STATE_REQUESTED_IMAGE, mRequestedImage);
 
         Object cardImageFrontObj = cardImageFront.getTag();
-        if (mFrontImageUnsaved && (cardImageFrontObj instanceof Bitmap) && Utils.saveTempImage(this, (Bitmap) cardImageFrontObj, TEMP_UNSAVED_FRONT_IMAGE_NAME, TEMP_UNSAVED_IMAGE_FORMAT) != null) {
+        if (mFrontImageUnsaved && (cardImageFrontObj instanceof Bitmap)
+                && Utils.saveTempImage(this, (Bitmap) cardImageFrontObj, TEMP_UNSAVED_FRONT_IMAGE_NAME,
+                ((Bitmap) cardImageFrontObj).hasAlpha() ? TEMP_UNSAVED_IMAGE_FORMAT : TEMP_UNSAVED_IMAGE_FORMAT_COMPRESSED) != null) {
             savedInstanceState.putInt(STATE_FRONT_IMAGE_UNSAVED, 1);
         } else {
             savedInstanceState.putInt(STATE_FRONT_IMAGE_UNSAVED, 0);
         }
 
         Object cardImageBackObj = cardImageBack.getTag();
-        if (mBackImageUnsaved && (cardImageBackObj instanceof Bitmap) && Utils.saveTempImage(this, (Bitmap) cardImageBackObj, TEMP_UNSAVED_BACK_IMAGE_NAME, TEMP_UNSAVED_IMAGE_FORMAT) != null) {
+        if (mBackImageUnsaved && (cardImageBackObj instanceof Bitmap) && Utils.saveTempImage(this, (Bitmap) cardImageBackObj, TEMP_UNSAVED_BACK_IMAGE_NAME, ((Bitmap) cardImageBackObj).hasAlpha() ? TEMP_UNSAVED_IMAGE_FORMAT : TEMP_UNSAVED_IMAGE_FORMAT_COMPRESSED) != null) {
             savedInstanceState.putInt(STATE_BACK_IMAGE_UNSAVED, 1);
         } else {
             savedInstanceState.putInt(STATE_BACK_IMAGE_UNSAVED, 0);
         }
 
         Object thumbnailObj = thumbnail.getTag();
-        if (mIconUnsaved && (thumbnailObj instanceof Bitmap) && Utils.saveTempImage(this, (Bitmap) thumbnailObj, TEMP_UNSAVED_ICON_NAME, TEMP_UNSAVED_IMAGE_FORMAT) != null) {
+        if (mIconUnsaved && (thumbnailObj instanceof Bitmap) && Utils.saveTempImage(this, (Bitmap) thumbnailObj, TEMP_UNSAVED_ICON_NAME, ((Bitmap) thumbnailObj).hasAlpha() ? TEMP_UNSAVED_IMAGE_FORMAT : TEMP_UNSAVED_IMAGE_FORMAT_COMPRESSED) != null) {
             savedInstanceState.putInt(STATE_ICON_UNSAVED, 1);
         } else {
             savedInstanceState.putInt(STATE_ICON_UNSAVED, 0);
@@ -648,8 +652,12 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
                     throw new RuntimeException("ucrop returned success but not destination uri!");
                 }
                 Log.d("cropper", "ucrop produced image at " + debugUri);
-                Bitmap bitmap = BitmapFactory.decodeFile(getCacheDir() + "/" + TEMP_CROP_IMAGE_NAME);
 
+                // Get file format to save image
+                List<String> debugUriPathSegments = debugUri.getPathSegments();
+                String debugUriFileFormat = debugUriPathSegments.get(debugUriPathSegments.size() - 1);
+
+                Bitmap bitmap = BitmapFactory.decodeFile(getCacheDir() + "/" + (debugUriFileFormat.contains("png") ? TEMP_CROP_IMAGE_NAME : TEMP_CROP_IMAGE_NAME_COMPRESSED));
                 if (bitmap != null) {
                     if (requestedFrontImage()) {
                         mFrontImageUnsaved = true;
@@ -683,9 +691,10 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
 
     // ucrop 2.2.6 initial aspect ratio is glitched when 0x0 is used as the initial ratio option
     // https://github.com/Yalantis/uCrop/blob/281c8e6438d81f464d836fc6b500517144af264a/ucrop/src/main/java/com/yalantis/ucrop/UCropActivity.java#L264
-    // so source width height has to be provided for now, depending on whether future versions of ucrop will support 0x0 as the default option
-    private void setCropperOptions(boolean cardShapeDefault, float sourceWidth, float sourceHeight) {
-        mCropperOptions.setCompressionFormat(TEMP_CROP_IMAGE_FORMAT);
+    // so source width height has to be provided for now, depending on whether future versions of ucrop will support 0x0 as the default option.
+    // Updated to include format name as a parameter to set compression format accordingly.
+    private void setCropperOptions(boolean cardShapeDefault, float sourceWidth, float sourceHeight, Bitmap.CompressFormat format) {
+        mCropperOptions.setCompressionFormat(format);
         mCropperOptions.setFreeStyleCropEnabled(true);
         mCropperOptions.setHideBottomControls(false);
         // default aspect ratio workaround
@@ -1381,7 +1390,9 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
 
     public void startCropperUri(Uri sourceUri) {
         Log.d("cropper", "launching cropper with image " + sourceUri.getPath());
-        File cropOutput = Utils.createTempFile(this, TEMP_CROP_IMAGE_NAME);
+        List<String> uriPathSegments = sourceUri.getPathSegments();
+        String uriFileFormat = uriPathSegments.get(uriPathSegments.size() - 2);
+        File cropOutput = Utils.createTempFile(this, uriFileFormat.contains("png") ? TEMP_CROP_IMAGE_NAME : TEMP_CROP_IMAGE_NAME_COMPRESSED);
         Uri destUri = Uri.parse("file://" + cropOutput.getAbsolutePath());
         Log.d("cropper", "asking cropper to output to " + destUri.toString());
 
@@ -1394,7 +1405,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
         }
 
         if (requestedIcon()) {
-            setCropperOptions(true, 0f, 0f);
+            setCropperOptions(true, 0f, 0f, TEMP_CROP_IMAGE_FORMAT);
         } else {
             // sniff the input image for width and height to work around a ucrop bug
             Bitmap image = null;
@@ -1406,19 +1417,23 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
             }
             if (image == null) {
                 Log.d("cropper", "failed loading bitmap for initial width and height for ucrop " + sourceUri.toString());
-                setCropperOptions(true, 0f, 0f);
+
+                // If image supports alpha channel, set format to png; otherwise, jpg.
+                setCropperOptions(true, 0f, 0f, image.hasAlpha() ? TEMP_CROP_IMAGE_FORMAT : TEMP_CROP_IMAGE_FORMAT_COMPRESSED);
             } else {
                 try {
                     Bitmap imageRotated = Utils.rotateBitmap(image, new ExifInterface(getContentResolver().openInputStream(sourceUri)));
-                    setCropperOptions(false, imageRotated.getWidth(), imageRotated.getHeight());
+                    boolean isTransparent = imageRotated.hasAlpha();
+                    Log.d("cropper", "does image have alpha channel: " + isTransparent);
+                    setCropperOptions(false, imageRotated.getWidth(), imageRotated.getHeight(), imageRotated.hasAlpha() ? TEMP_CROP_IMAGE_FORMAT : TEMP_CROP_IMAGE_FORMAT_COMPRESSED);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                     Log.d("cropper", "failed opening image for exif reading before setting initial width and height for ucrop");
-                    setCropperOptions(false, image.getWidth(), image.getHeight());
+                    setCropperOptions(false, image.getWidth(), image.getHeight(), TEMP_CROP_IMAGE_FORMAT);
                 } catch (IOException e) {
                     e.printStackTrace();
                     Log.d("cropper", "exif reading failed before setting initial width and height for ucrop");
-                    setCropperOptions(false, image.getWidth(), image.getHeight());
+                    setCropperOptions(false, image.getWidth(), image.getHeight(), TEMP_CROP_IMAGE_FORMAT);
                 }
             }
         }

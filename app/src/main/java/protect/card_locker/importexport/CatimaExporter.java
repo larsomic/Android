@@ -71,8 +71,11 @@ public class CatimaExporter implements Exporter {
                 // If it exists, add to the .zip file
                 Bitmap image = Utils.retrieveCardImage(context, card.id, imageLocationType);
                 if (image != null) {
+                    // Determine whether the image has transparent background, in order to
+                    // determine the file format.
                     boolean isBGTransparent = Utils.hasTransparentBackground(image);
                     String format = isBGTransparent ? "png" : "jpg";
+
                     ZipParameters imageZipParameters = createZipParameters(Utils.getCardImageFileName(card.id, imageLocationType, format), password);
                     zipOutputStream.putNextEntry(imageZipParameters);
                     InputStream imageInputStream = new ByteArrayInputStream(Utils.bitmapToByteArray(image, isBGTransparent));

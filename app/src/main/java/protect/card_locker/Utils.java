@@ -265,6 +265,8 @@ public class Utils {
         return new BigDecimal(numberFormat.parse(value).toString());
     }
 
+    // Updated to include whether the bitmap has transparent background.
+    // The boolean variable is used to determine the CompressFormat used in bitmap.compressed().
     static public byte[] bitmapToByteArray(Bitmap bitmap, boolean hasTransparentBackground) {
         if (bitmap == null) {
             return null;
@@ -364,10 +366,14 @@ public class Utils {
         }
 
         FileOutputStream out = context.openFileOutput(fileName, Context.MODE_PRIVATE);
-        //int[] bitmapPixels = new int[bitmap.getHeight() * bitmap.getWidth()];
         bitmap.compress(determineCardImageFormat(bitmap), 100, out);
     }
 
+    /**
+     * Determine whether an image has a transparent background.
+     * @param bitmap bitmap of an image
+     * @return compress format of the card
+     */
     public static Bitmap.CompressFormat determineCardImageFormat(Bitmap bitmap) {
         boolean hasTransparentBackground = false;
         for (int i = 0; i < bitmap.getWidth(); i++) {

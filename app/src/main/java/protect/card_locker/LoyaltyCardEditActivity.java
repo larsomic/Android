@@ -652,8 +652,11 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
                     throw new RuntimeException("ucrop returned success but not destination uri!");
                 }
                 Log.d("cropper", "ucrop produced image at " + debugUri);
+
+                // Get file format to save image
                 List<String> debugUriPathSegments = debugUri.getPathSegments();
                 String debugUriFileFormat = debugUriPathSegments.get(debugUriPathSegments.size() - 1);
+
                 Bitmap bitmap = BitmapFactory.decodeFile(getCacheDir() + "/" + (debugUriFileFormat.contains("png") ? TEMP_CROP_IMAGE_NAME : TEMP_CROP_IMAGE_NAME_COMPRESSED));
                 if (bitmap != null) {
                     if (requestedFrontImage()) {
@@ -688,7 +691,8 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
 
     // ucrop 2.2.6 initial aspect ratio is glitched when 0x0 is used as the initial ratio option
     // https://github.com/Yalantis/uCrop/blob/281c8e6438d81f464d836fc6b500517144af264a/ucrop/src/main/java/com/yalantis/ucrop/UCropActivity.java#L264
-    // so source width height has to be provided for now, depending on whether future versions of ucrop will support 0x0 as the default option
+    // so source width height has to be provided for now, depending on whether future versions of ucrop will support 0x0 as the default option.
+    // Updated to include format name as a parameter to set compression format accordingly.
     private void setCropperOptions(boolean cardShapeDefault, float sourceWidth, float sourceHeight, Bitmap.CompressFormat format) {
         mCropperOptions.setCompressionFormat(format);
         mCropperOptions.setFreeStyleCropEnabled(true);
@@ -1414,6 +1418,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
             if (image == null) {
                 Log.d("cropper", "failed loading bitmap for initial width and height for ucrop " + sourceUri.toString());
 
+                // If image supports alpha channel, set format to png; otherwise, jpg.
                 setCropperOptions(true, 0f, 0f, image.hasAlpha() ? TEMP_CROP_IMAGE_FORMAT : TEMP_CROP_IMAGE_FORMAT_COMPRESSED);
             } else {
                 try {

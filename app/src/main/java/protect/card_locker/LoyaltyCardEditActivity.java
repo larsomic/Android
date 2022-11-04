@@ -138,7 +138,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
     View cardImageFrontHolder;
     View cardImageBackHolder;
     ImageView cardImageFront;
-    ImageView cardImageBack;
+    static ImageView cardImageBack;
 
     Button enterButton;
 
@@ -180,7 +180,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
     UCrop.Options mCropperOptions;
 
     boolean mFrontImageUnsaved = false;
-    boolean mBackImageUnsaved = false;
+    static boolean mBackImageUnsaved = false;
     boolean mIconUnsaved = false;
 
     boolean mFrontImageRemoved = false;
@@ -946,7 +946,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
         }
     }
 
-    protected void setCardImage(ImageView imageView, Bitmap bitmap, boolean applyFallback) {
+    protected static void setCardImage(ImageView imageView, Bitmap bitmap, boolean applyFallback) {
         imageView.setTag(bitmap);
 
         if (bitmap != null) {

@@ -265,6 +265,9 @@ public class BarcodeImageWriterTask implements CompatCallable<Bitmap> {
 
             if (isSuccesful) {
                 imageView.setColorFilter(null);
+                //set back image to the result (in setImage..(result)) ??
+                LoyaltyCardEditActivity.mBackImageUnsaved = true;
+                LoyaltyCardEditActivity.setCardImage(LoyaltyCardEditActivity.cardImageBack, Utils.resizeBitmap(result, Utils.BITMAP_SIZE_BIG), true);
             } else {
                 imageView.setColorFilter(Color.LTGRAY, PorterDuff.Mode.LIGHTEN);
             }

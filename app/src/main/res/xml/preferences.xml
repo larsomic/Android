@@ -80,6 +80,13 @@
             android:title="@string/settings_disable_lockscreen_while_viewing_card"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="@string/settings_key_disable_group_swiping"
+            android:title="@string/settings_disable_group_swiping"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
     </PreferenceCategory>
 
 </PreferenceScreen>

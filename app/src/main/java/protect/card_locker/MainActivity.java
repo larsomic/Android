@@ -785,16 +785,13 @@ public class MainActivity extends CatimaAppCompatActivity implements LoyaltyCard
         return super.dispatchTouchEvent(ev);
     }
 
+    // Handle horizontal swipes.
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
         Log.d(TAG, "On fling");
 
-        // Don't swipe if we have too much vertical movement
-        if (Math.abs(velocityY) > (0.75 * Math.abs(velocityX))) {
-            return false;
-        }
-
-        if (groupsTabLayout.getTabCount() < 2) {
+        // Don't swipe if we have too much vertical movement or if there is only one tab.
+        if (Math.abs(velocityY) > (0.75 * Math.abs(velocityX)) || groupsTabLayout.getTabCount() < 2) {
             return false;
         }
 

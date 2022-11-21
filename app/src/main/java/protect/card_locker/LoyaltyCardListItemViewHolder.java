@@ -21,6 +21,10 @@ import com.google.android.material.color.MaterialColors;
 
 import protect.card_locker.databinding.LoyaltyCardLayoutBinding;
 
+/**
+ * Class extracted from LoyaltyCardCursorAdaptor.
+ * Handles list view for cards.
+ */
 public class LoyaltyCardListItemViewHolder extends RecyclerView.ViewHolder {
 
     public TextView mStoreField, mNoteField, mBalanceField, mExpiryField;
@@ -32,6 +36,12 @@ public class LoyaltyCardListItemViewHolder extends RecyclerView.ViewHolder {
     private int mIconBackgroundColor;
     private LoyaltyCardCursorAdapter lcCursorAdaptor;
 
+    /**
+     * Constructor.
+     * @param loyaltyCardLayoutBinding
+     * @param inputListener
+     * @param cursorAdaptor
+     */
     protected LoyaltyCardListItemViewHolder(LoyaltyCardLayoutBinding loyaltyCardLayoutBinding,
                                             LoyaltyCardCursorAdapter.CardAdapterListener inputListener,
                                             LoyaltyCardCursorAdapter cursorAdaptor) {
@@ -155,11 +165,21 @@ public class LoyaltyCardListItemViewHolder extends RecyclerView.ViewHolder {
 
     }
 
+    /**
+     * Sets icon background color.
+     * @param color the color to be set
+     */
     public void setIconBackgroundColor(int color) {
         mIconBackgroundColor = color;
         mCardIcon.setBackgroundColor(color);
     }
 
+    /**
+     * Converts dp to px.
+     * @param dp the dp to convert.
+     * @param mContext the context where the conversion should happen.
+     * @return
+     */
     public int dpToPx(int dp, Context mContext) {
         Resources r = mContext.getResources();
         int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics());

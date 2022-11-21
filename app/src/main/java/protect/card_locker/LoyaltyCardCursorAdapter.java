@@ -85,6 +85,8 @@ public class LoyaltyCardCursorAdapter extends BaseCursorAdapter<LoyaltyCardListI
         return mShowDetails;
     }
 
+    // this method has been updated to take into account the extraction of the
+    // LoyaltyCardListItemViewHolder class.
     @NonNull
     @Override
     public LoyaltyCardListItemViewHolder onCreateViewHolder(@NonNull ViewGroup inputParent, int inputViewType) {

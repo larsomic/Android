@@ -1,11 +1,7 @@
 package protect.card_locker;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.DatePickerDialog;
-import android.app.Dialog;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -29,7 +25,6 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -42,8 +37,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
-import com.jaredrummler.android.colorpicker.ColorPickerDialog;
-import com.jaredrummler.android.colorpicker.ColorPickerDialogListener;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.model.AspectRatio;
 
@@ -55,17 +48,12 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.NoSuchElementException;
-import java.util.concurrent.Callable;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -84,7 +72,7 @@ import protect.card_locker.databinding.LoyaltyCardEditActivityBinding;
 
 public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
     private LoyaltyCardEditActivityBinding binding;
-    private static final String TAG = "Catima";
+    static final String TAG = "Catima";
 
     private final String STATE_TAB_INDEX = "savedTab";
     private final String STATE_TEMP_CARD = "tempLoyaltyCard";
@@ -107,9 +95,9 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
     private final String TEMP_UNSAVED_ICON_NAME = LoyaltyCardEditActivity.class.getSimpleName() + "_icon.png";
     private final Bitmap.CompressFormat TEMP_UNSAVED_IMAGE_FORMAT = Bitmap.CompressFormat.PNG;
 
-    private static final int PERMISSION_REQUEST_CAMERA_IMAGE_FRONT = 100;
-    private static final int PERMISSION_REQUEST_CAMERA_IMAGE_BACK = 101;
-    private static final int PERMISSION_REQUEST_CAMERA_IMAGE_ICON = 102;
+    public static final int PERMISSION_REQUEST_CAMERA_IMAGE_FRONT = 100;
+    static final int PERMISSION_REQUEST_CAMERA_IMAGE_BACK = 101;
+    static final int PERMISSION_REQUEST_CAMERA_IMAGE_ICON = 102;
 
     public static final String BUNDLE_ID = "id";
     public static final String BUNDLE_DUPLICATE_ID = "duplicateId";
@@ -218,7 +206,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
         );
     }
 
-    private void updateTempState(LoyaltyCardField fieldName, Object value) {
+    public void updateTempState(LoyaltyCardField fieldName, Object value) {
         tempLoyaltyCard = updateTempState(tempLoyaltyCard, fieldName, value);
 
         if (initDone && (fieldName == LoyaltyCardField.cardId || fieldName == LoyaltyCardField.barcodeId || fieldName == LoyaltyCardField.barcodeType)) {
@@ -907,11 +895,11 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
 
         generateBarcode();
 
-        enterButton.setOnClickListener(new EditCardIdAndBarcode());
-        barcodeImage.setOnClickListener(new EditCardIdAndBarcode());
+        enterButton.setOnClickListener(new EditCardIdAndBarcode(this));
+        barcodeImage.setOnClickListener(new EditCardIdAndBarcode(this));
 
-        cardImageFrontHolder.setOnClickListener(new ChooseCardImage());
-        cardImageBackHolder.setOnClickListener(new ChooseCardImage());
+        cardImageFrontHolder.setOnClickListener(new ChooseCardImage(this));
+        cardImageBackHolder.setOnClickListener(new ChooseCardImage(this));
 
         FloatingActionButton saveButton = binding.fabSave;
         saveButton.setOnClickListener(v -> doSave());
@@ -924,7 +912,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
         // NP_NULL_PARAM_DEREF: Method call passes null for non-null parameter
         Integer headerColor = tempLoyaltyCard.headerColor;
         if (headerColor != null) {
-            thumbnail.setOnClickListener(new ChooseCardImage());
+            thumbnail.setOnClickListener(new ChooseCardImage(this));
             thumbnailEditIcon.setBackgroundColor(Utils.needsDarkForeground(headerColor) ? Color.BLACK : Color.WHITE);
             thumbnailEditIcon.setColorFilter(Utils.needsDarkForeground(headerColor) ? Color.WHITE : Color.BLACK);
         }
@@ -1055,241 +1043,11 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
     }
 
 
-    private void takePhotoForCard(int type) {
+    void takePhotoForCard(int type) {
         Uri photoURI = FileProvider.getUriForFile(LoyaltyCardEditActivity.this, BuildConfig.APPLICATION_ID, Utils.createTempFile(this, TEMP_CAMERA_IMAGE_NAME));
         mRequestedImage = type;
 
         mPhotoTakerLauncher.launch(photoURI);
-    }
-
-    class EditCardIdAndBarcode implements View.OnClickListener {
-        @Override
-        public void onClick(View v) {
-            Intent i = new Intent(getApplicationContext(), ScanActivity.class);
-            final Bundle b = new Bundle();
-            b.putString(LoyaltyCardEditActivity.BUNDLE_CARDID, cardIdFieldView.getText().toString());
-            i.putExtras(b);
-            mCardIdAndBarCodeEditorLauncher.launch(i);
-        }
-    }
-
-    class ChooseCardImage implements View.OnClickListener {
-        @Override
-        public void onClick(View v) throws NoSuchElementException {
-            ImageView targetView;
-
-            if (v.getId() == R.id.frontImageHolder) {
-                targetView = cardImageFront;
-            } else if (v.getId() == R.id.backImageHolder) {
-                targetView = cardImageBack;
-            } else if (v.getId() == R.id.thumbnail) {
-                targetView = thumbnail;
-            } else {
-                throw new IllegalArgumentException("Invalid IMAGE ID " + v.getId());
-            }
-
-            LinkedHashMap<String, Callable<Void>> cardOptions = new LinkedHashMap<>();
-            if (targetView.getTag() != null && v.getId() != R.id.thumbnail) {
-                cardOptions.put(getString(R.string.removeImage), () -> {
-                    if (targetView == cardImageFront) {
-                        mFrontImageRemoved = true;
-                        mFrontImageUnsaved = false;
-                    } else {
-                        mBackImageRemoved = true;
-                        mBackImageUnsaved = false;
-                    }
-
-                    setCardImage(targetView, null, true);
-                    return null;
-                });
-            }
-
-            if (v.getId() == R.id.thumbnail) {
-                cardOptions.put(getString(R.string.selectColor), () -> {
-                    ColorPickerDialog.Builder dialogBuilder = ColorPickerDialog.newBuilder();
-
-                    if (tempLoyaltyCard.headerColor != null) {
-                        dialogBuilder.setColor(tempLoyaltyCard.headerColor);
-                    }
-
-                    ColorPickerDialog dialog = dialogBuilder.create();
-                    dialog.setColorPickerDialogListener(new ColorPickerDialogListener() {
-                        @Override
-                        public void onColorSelected(int dialogId, int color) {
-                            updateTempState(LoyaltyCardField.headerColor, color);
-
-                            thumbnailEditIcon.setBackgroundColor(Utils.needsDarkForeground(color) ? Color.BLACK : Color.WHITE);
-                            thumbnailEditIcon.setColorFilter(Utils.needsDarkForeground(color) ? Color.WHITE : Color.BLACK);
-
-                            // Unset image if set
-                            thumbnail.setTag(null);
-
-                            generateIcon(storeFieldEdit.getText().toString());
-                        }
-
-                        @Override
-                        public void onDialogDismissed(int dialogId) {
-                            // Nothing to do, no change made
-                        }
-                    });
-                    dialog.show(getSupportFragmentManager(), "color-picker-dialog");
-
-                    setCardImage(targetView, null, false);
-                    mIconRemoved = true;
-                    mIconUnsaved = false;
-
-                    return null;
-                });
-            }
-
-            cardOptions.put(getString(R.string.takePhoto), () -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    int permissionRequestType;
-
-                    if (v.getId() == R.id.frontImageHolder) {
-                        permissionRequestType = PERMISSION_REQUEST_CAMERA_IMAGE_FRONT;
-                    } else if (v.getId() == R.id.backImageHolder) {
-                        permissionRequestType = PERMISSION_REQUEST_CAMERA_IMAGE_BACK;
-                    } else if (v.getId() == R.id.thumbnail) {
-                        permissionRequestType = PERMISSION_REQUEST_CAMERA_IMAGE_ICON;
-                    } else {
-                        throw new IllegalArgumentException("Unknown ID type " + v.getId());
-                    }
-
-                    requestPermissions(new String[]{Manifest.permission.CAMERA}, permissionRequestType);
-                } else {
-                    int cardImageType;
-
-                    if (v.getId() == R.id.frontImageHolder) {
-                        cardImageType = Utils.CARD_IMAGE_FROM_CAMERA_FRONT;
-                    } else if (v.getId() == R.id.backImageHolder) {
-                        cardImageType = Utils.CARD_IMAGE_FROM_CAMERA_BACK;
-                    } else if (v.getId() == R.id.thumbnail) {
-                        cardImageType = Utils.CARD_IMAGE_FROM_CAMERA_ICON;
-                    } else {
-                        throw new IllegalArgumentException("Unknown ID type " + v.getId());
-                    }
-
-                    takePhotoForCard(cardImageType);
-                }
-                return null;
-            });
-
-            cardOptions.put(getString(R.string.addFromImage), () -> {
-                if (v.getId() == R.id.frontImageHolder) {
-                    mRequestedImage = Utils.CARD_IMAGE_FROM_FILE_FRONT;
-                } else if (v.getId() == R.id.backImageHolder) {
-                    mRequestedImage = Utils.CARD_IMAGE_FROM_FILE_BACK;
-                } else if (v.getId() == R.id.thumbnail) {
-                    mRequestedImage = Utils.CARD_IMAGE_FROM_FILE_ICON;
-                } else {
-                    throw new IllegalArgumentException("Unknown ID type " + v.getId());
-                }
-
-                Intent i = new Intent(Intent.ACTION_PICK);
-                i.setType("image/*");
-
-                try {
-                    mPhotoPickerLauncher.launch(i);
-                } catch (ActivityNotFoundException e) {
-                    Toast.makeText(getApplicationContext(), R.string.failedLaunchingPhotoPicker, Toast.LENGTH_LONG).show();
-                    Log.e(TAG, "No activity found to handle intent", e);
-                }
-
-                return null;
-            });
-
-            int titleResource;
-
-            if (v.getId() == R.id.frontImageHolder) {
-                titleResource = R.string.setFrontImage;
-            } else if (v.getId() == R.id.backImageHolder) {
-                titleResource = R.string.setBackImage;
-            } else if (v.getId() == R.id.thumbnail) {
-                titleResource = R.string.setIcon;
-            } else {
-                throw new IllegalArgumentException("Unknown ID type " + v.getId());
-            }
-
-            new MaterialAlertDialogBuilder(LoyaltyCardEditActivity.this)
-                    .setTitle(getString(titleResource))
-                    .setItems(cardOptions.keySet().toArray(new CharSequence[cardOptions.size()]), (dialog, which) -> {
-                        Iterator<Callable<Void>> callables = cardOptions.values().iterator();
-                        Callable<Void> callable = callables.next();
-
-                        for (int i = 0; i < which; i++) {
-                            callable = callables.next();
-                        }
-
-                        try {
-                            callable.call();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-
-                            // Rethrow as NoSuchElementException
-                            // This isn't really true, but a View.OnClickListener doesn't allow throwing other types
-                            throw new NoSuchElementException(e.getMessage());
-                        }
-                    })
-                    .show();
-        }
-    }
-
-    public static class DatePickerFragment extends DialogFragment
-            implements DatePickerDialog.OnDateSetListener {
-
-        final Context context;
-        final EditText expiryFieldEdit;
-
-        DatePickerFragment(Context context, EditText expiryFieldEdit) {
-            this.context = context;
-            this.expiryFieldEdit = expiryFieldEdit;
-        }
-
-        @NonNull
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            // Use the current date as the default date in the picker
-            final Calendar c = Calendar.getInstance();
-
-            Date date = (Date) expiryFieldEdit.getTag();
-            if (date != null) {
-                c.setTime(date);
-            }
-
-            int year = c.get(Calendar.YEAR);
-            int month = c.get(Calendar.MONTH);
-            int day = c.get(Calendar.DAY_OF_MONTH);
-
-            // Create a new instance of DatePickerDialog and return it
-            DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), this, year, month, day);
-            datePickerDialog.getDatePicker().setMinDate(getMinDateOfDatePicker());
-            return datePickerDialog;
-        }
-
-        private long getMinDateOfDatePicker()
-        {
-            Calendar minDateCalendar = Calendar.getInstance();
-            minDateCalendar.set(1970, 0, 1);
-            return minDateCalendar.getTimeInMillis();
-        }
-
-        public void onDateSet(DatePicker view, int year, int month, int day) {
-            Calendar c = Calendar.getInstance();
-            c.set(Calendar.YEAR, year);
-            c.set(Calendar.MONTH, month);
-            c.set(Calendar.DAY_OF_MONTH, day);
-            c.set(Calendar.HOUR, 0);
-            c.set(Calendar.MINUTE, 0);
-            c.set(Calendar.SECOND, 0);
-            c.set(Calendar.MILLISECOND, 0);
-
-            long unixTime = c.getTimeInMillis();
-
-            Date date = new Date(unixTime);
-
-            formatExpiryField(context, expiryFieldEdit, date);
-        }
     }
 
     private void doSave() {
@@ -1479,7 +1237,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
         }
     }
 
-    private void generateIcon(String store) {
+    public void generateIcon(String store) {
         if (tempLoyaltyCard.headerColor == null) {
             return;
         }

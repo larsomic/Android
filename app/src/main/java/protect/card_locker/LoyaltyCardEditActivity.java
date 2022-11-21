@@ -59,6 +59,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -214,6 +215,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
                 (int) (fieldName == LoyaltyCardField.starStatus ? value : loyaltyCard.starStatus),
                 0, // Unimportant, always set to null in doSave so the DB updates it to the current timestamp
                 100, // Unimportant, not updated in doSave, defaults to 100 for new cards
+                100,
                 (int) (fieldName == LoyaltyCardField.archiveStatus ? value : loyaltyCard.archiveStatus)
         );
     }
@@ -778,7 +780,7 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
                 }
             } else {
                 // New card, use default values
-                tempLoyaltyCard = new LoyaltyCard(-1, "", "", null, new BigDecimal("0"), null, "", null, null, null, 0, Utils.getUnixTime(), 100,0);
+                tempLoyaltyCard = new LoyaltyCard(-1, "", "", null, new BigDecimal("0"), null, "", null, null, null, 0, Utils.getUnixTime(), 100, 100, 0);
 
             }
         }
@@ -1275,11 +1277,11 @@ public class LoyaltyCardEditActivity extends CatimaAppCompatActivity {
         }
 
         public void onDateSet(DatePicker view, int year, int month, int day) {
-            Calendar c = Calendar.getInstance();
+            Calendar c = new GregorianCalendar();
             c.set(Calendar.YEAR, year);
             c.set(Calendar.MONTH, month);
             c.set(Calendar.DAY_OF_MONTH, day);
-            c.set(Calendar.HOUR, 0);
+            c.set(Calendar.HOUR_OF_DAY, 0);
             c.set(Calendar.MINUTE, 0);
             c.set(Calendar.SECOND, 0);
             c.set(Calendar.MILLISECOND, 0);

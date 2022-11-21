@@ -73,7 +73,6 @@ public class ImportExportActivity extends CatimaAppCompatActivity {
 
         // If the application does not have permissions to external
         // storage, ask for it now
-
         if (ContextCompat.checkSelfPermission(ImportExportActivity.this,
                 Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(ImportExportActivity.this,
